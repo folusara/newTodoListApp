@@ -8,39 +8,51 @@ import { faCircle } from '@fortawesome/free-solid-svg-icons'
 import { faStar } from '@fortawesome/free-solid-svg-icons'
 import { faTrash } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Fragment, useRef} from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 
 
 const Home: NextPage = () => {
 
+  
 
-  interface TodoEvents {
-    events: string[];
-  }
+  // interface TodoEvents {
+  //   events: string[];
+  // }
   
   let [todoName, setTodoName] = useState("")
-  let [event, setEvent] = useState<string[]>([])  
-  let [todoEvents, setTodoEvents] =  useState<string[]>([])
-  let [prioritizedEvents, setPrioritizedEvents] =  useState<string[]>([])
+  let [event, setEvent] = useState<{todoName:string,presentMoment: string}>({todoName:"",presentMoment:""})  
+  let [todoEvents, setTodoEvents] =  useState<{todoName:string,presentMoment: string}[]>([])
+  let [prioritizedEvents, setPrioritizedEvents] =  useState<{todoName:string,presentMoment: string}[]>([])
   let [showTodo, setShowTodo] = useState(false)
   let [show, setShow] = useState(false)
+  // let [date, setDate] = useState({})
+
 
   let [friendName, setFriendName] = useState("")
 
   const [open, setOpen] = useState(true)
   const cancelButtonRef = useRef(null)
 
+  useEffect(() => {
+   
+  }, [prioritizedEvents, todoEvents])
+  
+
 
   const AddTodoEvent = async (e:any) => {
+    let date = new Date()
+    console.log(date.toDateString());
+    let presentMoment = date.toDateString()
+    
       e.preventDefault()
       if (e.target.todoName.value === "") {
         setShow(true)
         return
       }
       setTodoName(todoName = e.target.todoName.value)
-      todoEvents.push(todoName)
+      todoEvents.push({todoName,presentMoment})
       setShowTodo(true)
       e.target.reset()
   }
@@ -57,9 +69,8 @@ const Home: NextPage = () => {
     })
     let filteredPrioritized = prioritizedEvents.filter((itemName, index)=>{
       console.log(itemName, item);
-      return item !== itemName
+      return item !== itemName.todoName
     })
-
     console.log(filteredPrioritized);
     setPrioritizedEvents(prioritizedEvents = filteredPrioritized)
     console.log(prioritizedEvents);
@@ -69,16 +80,25 @@ const Home: NextPage = () => {
     if (todoEvents.length === 0) {
       setShowTodo(false)
       setPrioritizedEvents([])
+      // setEvent({})
+      return
     }
   }
 
-  const proritizeEvent = (indexNO:any, item:string) =>{
-       
-    if (prioritizedEvents.includes(item)) {
+  const proritizeEvent = (indexNO:any, item:{todoName:string,presentMoment: string}) =>{
+       console.log(item);
+       let getIndex = prioritizedEvents.findIndex((event) =>{       
+       return  event.todoName === item.todoName;
+       });
+       console.log(getIndex );
+    if (getIndex >= 0) {
       return
     }
-    event.push(todoEvents[indexNO]);
-    setPrioritizedEvents(prioritizedEvents = event)
+    // setEvent({})
+    console.log(todoEvents[indexNO]);
+    setEvent(event = todoEvents[indexNO]);
+    console.log(event);
+    prioritizedEvents.push(event)
     console.log(prioritizedEvents);
   }
   return ( 
@@ -272,12 +292,13 @@ const Home: NextPage = () => {
                       <div key={indexNO} className='w-8/12 ml-16 md:ml-28  mt-3 flex flex-row text-center pr-3 bg-white pt-5 hover:p-5  pb-5 justify-self-center hover:drop-shadow-lg hover:rounded-md'>
                       <FontAwesomeIcon icon={faCircle} onClick={()=> proritizeEvent(indexNO, item)} className=" mt-4 ml-4  h-5 w-5 text-sky-500 hover:text-sky-600" />
                       <div className='flex flex-col w-7/12' >
-                        <h4 className='mt-4 text-gray-500 mb-5' >  {item} </h4>
+                        <h4 className='mt-4 text-gray-500 mb-5' >  {item.todoName} </h4>
                         <div className='h-0.5 w-11/12 bg-sky-600 -mt-5 ml-3'></div>
+                        <h4 className='mt-4 text-gray-500 mb-5' > Added on   {item.presentMoment} </h4>
                       </div>
                       <FontAwesomeIcon icon={faStar} onClick={()=> proritizeEvent(indexNO,item)} className=" mt-4 ml-4  h-5 w-5 text-gray-500 hover:text-gray-200" />
                       {/* <FontAwesomeIcon icon={faPenToSquare} className=" mt-4 ml-4 h-5 w-5 text-gray-500" /> */}
-                      <FontAwesomeIcon icon={faTrash} onClick={()=>deleteEvent(indexNO, item)} className=" mt-4 ml-4  h-5 w-5 text-gray-500 hover:text-gray-200" />
+                      <FontAwesomeIcon icon={faTrash} onClick={()=>deleteEvent(indexNO, item.todoName)} className=" mt-4 ml-4  h-5 w-5 text-gray-500 hover:text-gray-200" />
                   </div>
                  
                    )}
